@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HelpdeskClient.Server.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

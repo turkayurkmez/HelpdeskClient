@@ -2,7 +2,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using HelpdeskClient.Shared
-@attribute [Authorize]
+
+@inject IHttpClientFactory ClientFactory
 @inject HttpClient Http
 
 <h1>Weather forecast</h1>
@@ -45,7 +46,8 @@ else
     {
         try
         {
-            forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+            var client = ClientFactory.CreateClient("ServerAPI.NoAuthenticationClient");
+            forecasts = await client.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
         }
         catch (AccessTokenNotAvailableException exception)
         {
