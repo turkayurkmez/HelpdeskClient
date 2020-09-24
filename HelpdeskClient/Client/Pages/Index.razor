@@ -1,8 +1,82 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization;
+@using HelpdeskClient.Shared
+@inject HttpClient http
+@inject IHttpClientFactory ClientFactory
 
 <AuthorizeView Roles="@ADMIN_ROLE">
     <p>Yönetici...</p>
 </AuthorizeView>
+<SfToast ID="toast_default" Height="50" @ref="ToastObj" Title="Help Desk Client" Content="@ToastContent" TimeOut="5000">
+    <ToastPosition X="Right">
+
+    </ToastPosition>
+</SfToast>
+
+<h3>New Help Desk Ticket</h3>
+<br />
+<EditForm ID="new-doctor-form" Model="@objHelpDeskTicket" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <div>
+        <SfDropDownList TItem="HelpDeskStatus" TValue="string" PopupHeight="230px" Index="0" Placeholder="Status" DataSource="@HelpDeskStatus.Statuses" FloatLabelType="@FloatLabelType.Always" @bind-Value="objHelpDeskTicket.TicketStatus">
+            <DropDownListFieldSettings Text="Text" Value="ID">
+
+            </DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+    <div>
+        <SfDatePicker ID="TicketDate" Placeholder="Ticket Date" FloatLabelType="@FloatLabelType.Always" @bind-Value="@objHelpDeskTicket.TicketDate" Max="DateTime.Now" ShowClearButton="false"></SfDatePicker>
+        <ValidationMessage For="@(() => objHelpDeskTicket.TicketDate)" />
+    </div>
+    <div>
+        <SfTextBox Placeholder="Ticket Description" FloatLabelType="@FloatLabelType.Always" @bind-Value="@objHelpDeskTicket.TicketDescription"> </SfTextBox>
+        <ValidationMessage For="@(() => objHelpDeskTicket.TicketDescription)" />
+    </div>
+    <div>
+        <SfTextBox Placeholder="Requester Email" FloatLabelType="@FloatLabelType.Always" @bind-Value="@objHelpDeskTicket.TicketRequesterEmail"> </SfTextBox> <ValidationMessage For="@(() => objHelpDeskTicket.TicketRequesterEmail)" />
+    </div>
+    <br />
+    <br />
+    <div class="e-footer-content">
+        <div class="button-container">
+            <button type="submit" class="e-btn e-normal e-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
 @code{
     string ADMIN_ROLE = "Admins";
+    SfToast ToastObj;
+    private string ToastContent { get; set; } = "";
+
+    HttpClient NoAuthenticationClient;
+    HelpDeskTicket objHelpDeskTicket = new HelpDeskTicket();
+
+    protected override void OnInitialized()
+    {
+        NoAuthenticationClient = ClientFactory.CreateClient("ServerAPI.NoAuthenticationClient");
+    }
+
+    public async Task HandleValidSubmit(EditContext context)
+    {
+        try
+        {
+            objHelpDeskTicket.TicketGuid = System.Guid.NewGuid().ToString();
+            await NoAuthenticationClient.PostAsJsonAsync("HelpDesk", objHelpDeskTicket);
+
+            objHelpDeskTicket = new HelpDeskTicket();
+            ToastContent = "Kaydedildi!";
+            StateHasChanged();
+            await this.ToastObj.Show();
+        }
+        catch (Exception ex)
+        {
+            ToastContent = ex.Message;
+            StateHasChanged();
+            await this.ToastObj.Show();
+
+        }
+    }
+
+
 }

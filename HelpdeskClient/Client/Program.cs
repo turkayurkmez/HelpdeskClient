@@ -16,6 +16,7 @@ namespace HelpdeskClient.Client
     {
         public static async Task Main(string[] args)
         {
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzIxMDE1QDMxMzgyZTMyMmUzME02M1VOTXhFa2hheHRhRmgyRVJYY0Z2YjFqWlFiNTVUZUJFSjN4Q1JjOEE9");
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
@@ -26,6 +27,7 @@ namespace HelpdeskClient.Client
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("HelpdeskClient.ServerAPI"));
 
             builder.Services.AddHttpClient("ServerAPI.NoAuthenticationClient", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
+            
 
             builder.Services.AddApiAuthorization();
             builder.Services.AddSyncfusionBlazor(true);
